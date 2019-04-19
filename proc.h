@@ -32,6 +32,28 @@ struct context {
   uint eip;
 };
 
+//***********************
+
+struct container{
+  uint id;
+  // struct {
+  //   struct spinlock lock;
+  //   struct file file[NFILE];
+  // } cftable;
+  int pids[NPROC];
+};
+
+struct container_list{
+  // uint id;
+  // struct {
+  struct spinlock lock;
+  //   struct file file[NFILE];
+  // } cftable;
+  int alloc[NPROC];
+};
+
+//***********************
+
 enum procstate { UNUSED, EMBRYO, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
 
 // Per-process state
@@ -49,6 +71,9 @@ struct proc {
   struct file *ofile[NOFILE];  // Open files
   struct inode *cwd;           // Current directory
   char name[16];               // Process name (debugging)
+  //***********************
+  uint container_id;           // Container Id
+  //***********************
 };
 
 // Process memory is laid out contiguously, low addresses first:

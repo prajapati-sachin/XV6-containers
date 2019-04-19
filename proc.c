@@ -112,6 +112,9 @@ found:
   memset(p->context, 0, sizeof *p->context);
   p->context->eip = (uint)forkret;
 
+  //****************************************
+  p->container_id =0;
+  //****************************************
   return p;
 }
 
@@ -210,6 +213,10 @@ fork(void)
 
   safestrcpy(np->name, curproc->name, sizeof(curproc->name));
 
+  //**************************************************
+  np->container_id = curproc->container_id;
+
+  //***********************************************
   pid = np->pid;
 
   acquire(&ptable.lock);

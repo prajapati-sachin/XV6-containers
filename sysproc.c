@@ -94,3 +94,9 @@ int sys_ps(void){
   ps();
   return 0;
 }
+
+int sys_create_container(void){
+}
+
+int sys_destroy_container(void){
+}
