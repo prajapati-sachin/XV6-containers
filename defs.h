@@ -10,6 +10,9 @@ struct sleeplock;
 struct stat;
 struct superblock;
 
+int memory_log;
+int scheduler_log;
+
 // bio.c
 void            binit(void);
 struct buf*     bread(uint, uint);
@@ -121,6 +124,10 @@ int             wait(void);
 void            wakeup(void*);
 void            yield(void);
 void 			ps(void);
+void 			init_containerlist(void);
+int 			create_container(void);
+int 			destroy_container(int);
+int 			join_container(int);
 
 // swtch.S
 void            swtch(struct context**, struct context*);

@@ -43,14 +43,10 @@ struct container{
   int pids[NPROC];
 };
 
-struct container_list{
-  // uint id;
-  // struct {
-  struct spinlock lock;
-  //   struct file file[NFILE];
-  // } cftable;
-  int alloc[NPROC];
-};
+// struct{
+//   struct spinlock lock;
+//   int alloc[NPROC];
+// } container_list;
 
 //***********************
 

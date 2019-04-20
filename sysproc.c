@@ -83,7 +83,6 @@ int
 sys_uptime(void)
 {
   uint xticks;
-
   acquire(&tickslock);
   xticks = ticks;
   release(&tickslock);
@@ -96,7 +95,48 @@ int sys_ps(void){
 }
 
 int sys_create_container(void){
+  return create_container();
 }
 
 int sys_destroy_container(void){
+  int n;
+  if(argint(0, &n) < 0)
+    return -1;
+  return destroy_container(n);
+}
+
+int sys_join_container(void){
+  int n;
+  if(argint(0, &n) < 0)
+    return -1;
+  return join_container(n);
+}
+
+int sys_leave_container(void){
+  return 1;
+}
+
+int sys_scheduler_log_on(void){
+  scheduler_log = 1;
+  return 1;
+}
+
+int sys_scheduler_log_off(void){
+  scheduler_log = 0;
+  return 1;
+}
+
+int sys_memory_log_on(void){
+  memory_log = 1;
+  return 1;
+}
+
+int sys_memory_log_off(void){
+  memory_log = 0; 
+  return 1;
+}
+
+int sys_container_malloc(void){
+  // memory_log = 0; 
+  return 1;
 }

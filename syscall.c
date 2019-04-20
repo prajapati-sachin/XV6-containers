@@ -106,6 +106,13 @@ extern int sys_uptime(void);
 extern int sys_ps(void);
 extern int sys_create_container(void);
 extern int sys_destroy_container(void);
+extern int sys_join_container(void);
+extern int sys_leave_container(void);
+extern int sys_scheduler_log_on(void);
+extern int sys_scheduler_log_off(void);
+extern int sys_memory_log_on(void);
+extern int sys_memory_log_off(void);
+extern int sys_container_malloc(void);
 
 static int (*syscalls[])(void) = {
 [SYS_fork]                  sys_fork,
@@ -131,7 +138,14 @@ static int (*syscalls[])(void) = {
 [SYS_close]                 sys_close,
 [SYS_ps]                    sys_ps,
 [SYS_create_container]      sys_create_container,
-[SYS_destroy_container]     sys_destroy_container
+[SYS_destroy_container]     sys_destroy_container,
+[SYS_join_container]        sys_join_container, 
+[SYS_leave_container]       sys_leave_container,
+[SYS_scheduler_log_on]      sys_scheduler_log_on,
+[SYS_scheduler_log_off]     sys_scheduler_log_off,
+[SYS_memory_log_on]         sys_memory_log_on,
+[SYS_memory_log_off]        sys_memory_log_off,
+[SYS_container_malloc]      sys_container_malloc
 };
 
 void

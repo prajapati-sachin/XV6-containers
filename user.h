@@ -25,7 +25,14 @@ int sleep(int);
 int uptime(void);
 int ps(void);
 int create_container(void);
-int destroy_container(void);
+int destroy_container(int);
+int join_container(int);
+int leave_container(void);
+int scheduler_log_on(void);
+int scheduler_log_off(void);
+int memory_log_on(void);
+int memory_log_off(void);
+// int container_malloc(void);
 
 // ulib.c
 int stat(const char*, struct stat*);
