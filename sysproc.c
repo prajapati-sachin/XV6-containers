@@ -113,7 +113,7 @@ int sys_join_container(void){
 }
 
 int sys_leave_container(void){
-  return 1;
+  return leave_container();
 }
 
 int sys_scheduler_log_on(void){

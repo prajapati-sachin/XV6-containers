@@ -128,6 +128,7 @@ void 			init_containerlist(void);
 int 			create_container(void);
 int 			destroy_container(int);
 int 			join_container(int);
+int 			leave_container(void);
 
 // swtch.S
 void            swtch(struct context**, struct context*);

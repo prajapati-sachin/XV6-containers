@@ -36,11 +36,12 @@ struct context {
 
 struct container{
   uint id;
+  int curproc;
+  int pids[NPROC];
   // struct {
   //   struct spinlock lock;
   //   struct file file[NFILE];
   // } cftable;
-  int pids[NPROC];
 };
 
 // struct{

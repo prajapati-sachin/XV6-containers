@@ -18,6 +18,10 @@ struct{
 	struct container containers[NPROC];
 } container_list;
 
+//Initialising scheduler and memory log
+// memory_log = 0;
+// scheduler_log = 0;
+
 
 static struct proc *initproc;
 
@@ -347,8 +351,10 @@ scheduler(void)
 		// Loop over process table looking for process to run.
 		acquire(&ptable.lock);
 		for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-			if(p->state != RUNNABLE)
+			if(p->state != RUNNABLE || p->container_id!=0)
 				continue;
+
+			if(scheduler_log) cprintf("Scheduling Process(not in any container): %d\n", p->pid);
 
 			// Switch to chosen process.  It is the process's job
 			// to release ptable.lock and then reacquire it
@@ -363,6 +369,44 @@ scheduler(void)
 			// Process is done running for now.
 			// It should have changed its p->state before coming back.
 			c->proc = 0;
+		}
+
+		int i;
+		for(i=1; i<NPROC; i++){
+			if(container_list.alloc[i]==0) continue;
+			int j = container_list.containers[i].curproc+1;
+			int k = 0;
+			for(;;){
+				int temp_pid = container_list.containers[i].pids[j];
+				for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+					if(p->pid==temp_pid) break;
+				}
+				
+				j = (j+1)%NPROC;
+				k++;
+
+				if(p->state == RUNNABLE){
+					container_list.containers[i].curproc = (container_list.containers[i].curproc+1)%NPROC;
+					if(scheduler_log) cprintf("Container %d: Scheduling Process %d\n",i,  p->pid);
+					// Switch to chosen process.  It is the process's job
+					// to release ptable.lock and then reacquire it
+					// before jumping back to us.
+					c->proc = p;
+					switchuvm(p);
+					p->state = RUNNING;
+
+					swtch(&(c->scheduler), p->context);
+					switchkvm();
+
+					// Process is done running for now.
+					// It should have changed its p->state before coming back.
+					c->proc = 0;
+					break;
+				}
+
+				if(k>=NPROC) break;
+
+			}		
 		}
 		release(&ptable.lock);
 
@@ -561,12 +605,14 @@ void ps(void){
 	struct proc *p;
 	// char *state;
 	// uint pc[10];
-
+	struct proc *pp = myproc();
+	int my_cnid = pp->container_id; 
 	for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
 		if(p->state == UNUSED)
 			continue;
 		if(p->state >= 0 && p->state < NELEM(states) && states[p->state]){
-			cprintf("pid:%d name:%s\n", p->pid, p->name);
+			if(p->container_id==my_cnid)
+				cprintf("pid:%d name:%s container:%d\n", p->pid, p->name, p->container_id);
 			// state = states[p->state];
 		}
 		
@@ -581,6 +627,7 @@ void init_containerlist(void){
 	for(int i=0;i<NPROC;i++) {
 		container_list.alloc[i]=0; 
 		container_list.containers[i].id=0;
+		container_list.containers[i].curproc=-1;
 	}
 }
 
@@ -612,7 +659,7 @@ int create_container(){
 int destroy_container(int i){
 	acquire(&container_list.lock);
 
-	if(i>=NPROC ){  
+	if(i>=NPROC || i==0){  
 		release(&container_list.lock);
 		return -1;
 	}
@@ -620,7 +667,6 @@ int destroy_container(int i){
 		if(container_list.alloc[i]==0){
 			release(&container_list.lock);
 			return -1;
-
 		}
 		else{
 			acquire(&ptable.lock);
@@ -643,7 +689,7 @@ int join_container(int i){
 	struct proc *p = myproc();
 	
 	acquire(&ptable.lock);
-	if(p->container_id!=0){
+	if(p->container_id!=0 || i==0){
 		release(&ptable.lock);
 		return -1;
 	}
@@ -663,6 +709,37 @@ int join_container(int i){
 	}
 
 	container_list.containers[i].pids[j]=p->pid;
+	release(&container_list.lock);
+
+	return 0;
+}
+
+int leave_container(){
+	struct proc *p = myproc();
+	int my_cnid = p->container_id; 
+	int my_pid  = p->pid;
+	acquire(&ptable.lock);
+	if(p->container_id==0){
+		release(&ptable.lock);
+		return -1;
+	}
+	
+	p->container_id = 0;
+	
+	release(&ptable.lock);
+
+	acquire(&container_list.lock);
+	int j;
+	for(j=0;j<NPROC;j++){
+		if(container_list.containers[my_cnid].pids[j]==my_pid)
+			break;
+	}
+	if(j==NPROC){
+		release(&container_list.lock);
+		return -1;
+	}
+
+	container_list.containers[my_cnid].pids[j]=-1;
 	release(&container_list.lock);
 
 	return 0;
