@@ -294,6 +294,25 @@ sys_open(void)
   if(argstr(0, &path) < 0 || argint(1, &omode) < 0)
     return -1;
 
+// Additional Code for changing the appending special identifier to name of the file
+  struct proc *p = myproc();
+  if(p->container_id!=0){
+    int length=0;
+    while(path[length]!='\0'){
+      length++;
+    }
+    char temp[100];
+    int i;
+    for(i=0;i<length;i++) temp[i] = path[i];
+
+    temp[i] = 'c';
+    temp[++i] = (p->container_id/10) + '0';
+    temp[++i] = (p->container_id%10) + '0';
+    temp[++i] = '\0';
+
+    path = temp;
+  }
+//////////////////////////////////////////////////////////
   begin_op();
 
   if(omode & O_CREATE){
