@@ -15,11 +15,56 @@ fmtname(char *path)
   p++;
 
   // Return blank-padded name.
-  if(strlen(p) >= DIRSIZ)
+  if(strlen(p) >= DIRSIZ){
     return p;
+  }
+
+
   memmove(buf, p, strlen(p));
   memset(buf+strlen(p), ' ', DIRSIZ-strlen(p));
+  // printf(2, "ls: %d\n", cn);
   return buf;
+}
+
+int check(char *path)
+{
+  
+  char *p;
+
+  // Find first character after last slash.
+  for(p=path+strlen(path); p >= path && *p != '/'; p--)
+    ;
+  p++;
+
+  // Return blank-padded name.
+  if(strlen(p) >= DIRSIZ)
+    return 0;
+
+  char *pp; 
+  int cn = 0;
+  for(pp=p+strlen(p); pp>=p;pp--){
+    if(*pp =='%')
+      cn = 1;
+  }
+
+  if(cn==0)
+    return 0;
+
+
+  
+  for(pp=p+strlen(p); pp >= p && *pp != '%'; pp--)
+    ;
+  pp++;
+
+  char t = *pp;
+  int n = 0;
+  n+= (int)t - '0';
+  n*=10;
+  pp++;
+  t=*pp;
+  n+= (int)t - '0';
+
+  return n;
 }
 
 void
@@ -63,6 +108,8 @@ ls(char *path)
         printf(1, "ls: cannot stat %s\n", buf);
         continue;
       }
+
+
       printf(1, "%s %d %d %d\n", fmtname(buf), st.type, st.ino, st.size);
     }
     break;

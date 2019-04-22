@@ -30,3 +30,4 @@
 #define SYS_memory_log_on		  29
 #define SYS_memory_log_off		  30
 #define SYS_container_malloc	  31
+#define SYS_getcid 32

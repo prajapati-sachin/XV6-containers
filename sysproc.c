@@ -140,3 +140,9 @@ int sys_container_malloc(void){
   // memory_log = 0; 
   return 1;
 }
+
+int
+sys_getcid(void)
+{
+  return myproc()->container_id;
+}

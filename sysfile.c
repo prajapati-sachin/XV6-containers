@@ -245,9 +245,18 @@ create(char *path, short type, short major, short minor)
   struct inode *ip, *dp;
   char name[DIRSIZ];
 
+  struct proc *p = myproc();
+  cprintf("pid:%d name:%s container:%d\n", p->pid, path, p->container_id);
+
+
   if((dp = nameiparent(path, name)) == 0)
     return 0;
   ilock(dp);
+
+
+  // struct proc *p = myproc();
+  cprintf("pid:%d name:%s container:%d\n", p->pid, path, p->container_id);
+
 
   if((ip = dirlookup(dp, name, &off)) != 0){
     iunlockput(dp);
@@ -294,6 +303,7 @@ sys_open(void)
   if(argstr(0, &path) < 0 || argint(1, &omode) < 0)
     return -1;
 
+  int take = 1;
 // Additional Code for changing the appending special identifier to name of the file
   struct proc *p = myproc();
   if(p->container_id!=0){
@@ -311,11 +321,12 @@ sys_open(void)
     temp[++i] = '\0';
 
     path = temp;
+    take=0;
+    cprintf("pid:%d name:%s container:%d\n", p->pid, temp, p->container_id);
   }
 //////////////////////////////////////////////////////////
   begin_op();
-
-  if(omode & O_CREATE){
+  if((omode & O_CREATE)||take==0){
     ip = create(path, T_FILE, 0, 0);
     if(ip == 0){
       end_op();
