@@ -8,7 +8,7 @@ char *argv[] = { "ls", 0 };
 int
 main(void)
 {
-	ps();
+	// ps();
 
 	char *filename;
 	filename="arr";
@@ -22,6 +22,12 @@ main(void)
 	printf(1, "Container 2: %d\n", b);
 
 	join_container(1);
+	fd = open(filename, 0);
+	
+  	close(fd);	
+
+  	printf(1, "fd 2: %d\n", fd);
+
 	fd = open(filename, 0);
 	
   	close(fd);	

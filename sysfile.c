@@ -245,8 +245,6 @@ create(char *path, short type, short major, short minor)
   struct inode *ip, *dp;
   char name[DIRSIZ];
 
-  struct proc *p = myproc();
-  cprintf("pid:%d name:%s container:%d\n", p->pid, path, p->container_id);
 
 
   if((dp = nameiparent(path, name)) == 0)
@@ -255,7 +253,6 @@ create(char *path, short type, short major, short minor)
 
 
   // struct proc *p = myproc();
-  cprintf("pid:%d name:%s container:%d\n", p->pid, path, p->container_id);
 
 
   if((ip = dirlookup(dp, name, &off)) != 0){
@@ -303,6 +300,8 @@ sys_open(void)
   if(argstr(0, &path) < 0 || argint(1, &omode) < 0)
     return -1;
 
+  char *path1 = path;
+
   int take = 1;
 // Additional Code for changing the appending special identifier to name of the file
   struct proc *p = myproc();
@@ -315,34 +314,47 @@ sys_open(void)
     int i;
     for(i=0;i<length;i++) temp[i] = path[i];
 
-    temp[i] = 'c';
+    temp[i] = '%';
     temp[++i] = (p->container_id/10) + '0';
     temp[++i] = (p->container_id%10) + '0';
     temp[++i] = '\0';
 
+    
+    take = 2;
+    if((ip = namei(path1)) == 0){
+      take=0;
+      // cprintf("here\n");
+      // return -1;
+    }
+    cprintf("here %d\n",ip);
     path = temp;
-    take=0;
-    cprintf("pid:%d name:%s container:%d\n", p->pid, temp, p->container_id);
+    // take=0;
+    // cprintf("pid:%d name:%s container:%d\n", p->pid, temp, p->container_id);
   }
 //////////////////////////////////////////////////////////
   begin_op();
-  if((omode & O_CREATE)||take==0){
+  if((omode & O_CREATE)||(take==0)||(take==2)){
     ip = create(path, T_FILE, 0, 0);
     if(ip == 0){
       end_op();
       return -1;
     }
   } else {
+    // cprintf("here1:\n");
     if((ip = namei(path)) == 0){
+      // cprintf("here2: %d\n",ip);
       end_op();
       return -1;
     }
+    // cprintf("here: %d\n",ip);
     ilock(ip);
+    
     if(ip->type == T_DIR && omode != O_RDONLY){
       iunlockput(ip);
       end_op();
       return -1;
     }
+
   }
 
   if((f = filealloc()) == 0 || (fd = fdalloc(f)) < 0){
@@ -360,6 +372,74 @@ sys_open(void)
   f->off = 0;
   f->readable = !(omode & O_WRONLY);
   f->writable = (omode & O_WRONLY) || (omode & O_RDWR);
+
+  cprintf("here2: %s\n",path1);
+  cprintf("here2: %s\n",path);
+  cprintf("take: %d\n",take);
+  if(take==0){
+      cprintf("here1: %s\n",path1);
+      cprintf("here1: %s\n",path);
+      struct inode *ip1;
+      if((ip1 = namei(path1)) == 0){
+        // cprintf("here2: %d\n",ip);
+        end_op();
+        return -1;
+      }
+      // cprintf("here: %d\n",ip);
+      ilock(ip1);
+      
+      if(ip1->type == T_DIR && omode != O_RDONLY){
+        iunlockput(ip1);
+        end_op();
+        return -1;
+      }
+
+       struct file *nf;
+       int fd2;
+      if((nf = filealloc()) == 0 || (fd2 = fdalloc(nf)) < 0){
+        if(nf)
+          fileclose(nf);
+        iunlockput(ip1);
+        end_op();
+        return -1;
+      }
+      iunlock(ip1);
+      end_op();
+
+      nf->type = FD_INODE;
+      nf->ip = ip1;
+      nf->off = 0;
+      nf->readable = 1;
+      nf->writable = (omode & O_WRONLY) || (omode & O_RDWR);
+
+      f->writable = 1;
+      char newaddr;
+      int n = fileread(nf, &newaddr, 50);
+      cprintf("here2: %d %s\n",n,newaddr );
+      int n1 = filewrite(f, &newaddr, n);
+      cprintf("here2: %d \n",n1 );
+
+      // ilock(f->ip);
+      // ilock(nf->ip);
+
+      // if(writei(f->ip, (char*)nf->off, f->off, 1)>0){
+
+      //   f->off +=1;
+      //   nf->off +=1;
+      // }
+
+      // iunlock(f->ip);
+      // iunlock(nf->ip);
+
+
+      // f->writable = (omode & O_WRONLY) || (omode & O_RDWR);
+     
+
+
+  }
+
+
+
   return fd;
 }
 

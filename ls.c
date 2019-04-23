@@ -28,32 +28,29 @@ fmtname(char *path)
 
 int check(char *path)
 {
-  
   char *p;
-
-  // Find first character after last slash.
   for(p=path+strlen(path); p >= path && *p != '/'; p--)
     ;
   p++;
-
   // Return blank-padded name.
   if(strlen(p) >= DIRSIZ)
     return 0;
 
   char *pp; 
-  int cn = 0;
-  for(pp=p+strlen(p); pp>=p;pp--){
-    if(*pp =='%')
-      cn = 1;
+  int cn =0;
+  for(pp=p+strlen(p); pp >= p; pp--){
+    if(*pp=='%')
+      cn=1;
   }
 
   if(cn==0)
     return 0;
 
-
-  
   for(pp=p+strlen(p); pp >= p && *pp != '%'; pp--)
     ;
+
+  // *pp = '\0';
+
   pp++;
 
   char t = *pp;
@@ -65,6 +62,34 @@ int check(char *path)
   n+= (int)t - '0';
 
   return n;
+}
+
+char*
+cut(char *path)
+{
+  static char buf[DIRSIZ+1];
+  char *p;
+
+  // Find first character after last slash.
+  for(p=path+strlen(path); p >= path && *p != '/'; p--)
+    ;
+  p++;
+
+  // Return blank-padded name.
+  // if(strlen(p) >= DIRSIZ){
+  //   return p;
+  // }
+
+  memmove(buf, p, strlen(p)-3);
+  memset(buf+strlen(p)-3, ' ', DIRSIZ-strlen(p)+3);
+  // printf(2, "ls: %d\n", cn);
+  return buf;
+
+
+  // memmove(buf, p, strlen(p));
+  // memset(buf+strlen(p), ' ', DIRSIZ-strlen(p));
+  // // printf(2, "ls: %d\n", cn);
+  // return buf;
 }
 
 void
@@ -85,7 +110,13 @@ ls(char *path)
     close(fd);
     return;
   }
+  //////////////////////////////////////////////////
+  char record[100][28];
+  int count=0;
+  int cid = getcid();
 
+
+  ///////////////////////////////////////////
   switch(st.type){
   case T_FILE:
     printf(1, "%s %d %d %d\n", fmtname(path), st.type, st.ino, st.size);
@@ -109,8 +140,49 @@ ls(char *path)
         continue;
       }
 
+      int cd = check(buf);
 
-      printf(1, "%s %d %d %d\n", fmtname(buf), st.type, st.ino, st.size);
+      // if(count >2)
+      // printf(1, "cd: %d\n", cd );
+      
+      if(cid==0){
+        if(cd == 0){
+          // char *dese = record[count];
+          // strcpy(dese, fmtname(buf));
+          // count++;
+          printf(1, "%s %d %d %d %d\n", fmtname(buf), st.type, st.ino, st.size, cd);
+        }
+        else{
+          printf(1, "%s %d %d %d %d\n", fmtname(buf), st.type, st.ino, st.size, cd);
+        }
+      }
+      else{
+        
+        if(cd==0){
+          char *dese = record[count];
+          strcpy(dese, fmtname(buf));
+          count++;
+          printf(1, "%s %d %d %d %d\n", fmtname(buf), st.type, st.ino, st.size, cd);
+        }else{
+          // if(cd==cid){
+            int j=-1;
+            char *name = cut(buf);
+            for(j=0;j<count;j++){
+              char *dese = record[j];
+              if(strcmp(dese,name)==0)
+                break;
+            }
+            printf(1, "j: %d\n", j );
+            if(j==count)
+              printf(1, "%s %d %d %d %d\n", fmtname(buf), st.type, st.ino, st.size, cd);
+          // }
+        }
+        
+
+      }
+      
+      
+      // printf(1, "%s %d %d %d\n", fmtname(buf), st.type, st.ino, st.size);
     }
     break;
   }
