@@ -152,9 +152,9 @@ ls(char *path)
           // count++;
           printf(1, "%s %d %d %d %d\n", fmtname(buf), st.type, st.ino, st.size, cd);
         }
-        else{
-          printf(1, "%s %d %d %d %d\n", fmtname(buf), st.type, st.ino, st.size, cd);
-        }
+        // else{
+        //   printf(1, "%s %d %d %d %d\n", fmtname(buf), st.type, st.ino, st.size, cd);
+        // }
       }
       else{
         
@@ -164,7 +164,7 @@ ls(char *path)
           count++;
           printf(1, "%s %d %d %d %d\n", fmtname(buf), st.type, st.ino, st.size, cd);
         }else{
-          // if(cd==cid){
+          if(cd==cid){
             int j=-1;
             char *name = cut(buf);
             for(j=0;j<count;j++){
@@ -172,10 +172,10 @@ ls(char *path)
               if(strcmp(dese,name)==0)
                 break;
             }
-            printf(1, "j: %d\n", j );
+            // printf(1, "j: %d\n", j );
             if(j==count)
               printf(1, "%s %d %d %d %d\n", fmtname(buf), st.type, st.ino, st.size, cd);
-          // }
+          }
         }
         
 

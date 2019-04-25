@@ -227,6 +227,17 @@ fork(void)
 	//**************************************************
 	np->container_id = curproc->container_id;
 
+	int cd = curproc->container_id;
+	acquire(&container_list.lock);
+	int j;
+	for(j=0;j<NPROC;j++){
+		if(container_list.containers[cd].pids[j]==-1)
+			break;
+	}
+
+	container_list.containers[cd].pids[j]=np->pid;
+	release(&container_list.lock);
+
 	//***********************************************
 	pid = np->pid;
 

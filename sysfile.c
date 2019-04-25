@@ -308,7 +308,7 @@ sys_open(void)
 	// take = 0 : if called by a process with container and file not present already
 // Additional Code for changing the appending special identifier to name of the file
 	struct proc *p = myproc();
-	if(p->container_id!=0){
+	if(p->container_id!=0||p->name[0]=='l'){
 		int length=0;
 		while(path[length]!='\0'){
 			length++;
@@ -331,12 +331,17 @@ sys_open(void)
 		}
 		// cprintf("here %d\n",ip);
 		path = temp;
+
+		if((ip = namei(path)) == 0){
+			take=1;
+			//
+		}
 		// take=0;
 		// cprintf("pid:%d name:%s container:%d\n", p->pid, temp, p->container_id);
 	}
 //////////////////////////////////////////////////////////
 	begin_op();
-	if((omode & O_CREATE)||(take==0)||(take==2)){
+	if((omode & O_CREATE)||(take==2)){
 		ip = create(path, T_FILE, 0, 0);
 		if(ip == 0){
 			end_op();

@@ -33,6 +33,14 @@ main(void)
   	close(fd);	
 
 	printf(1, "fd 2: %d\n", fd);
-	
+
+	int ad = fork();
+	if(ad==0){
+		exec("ls", argv);
+		// leave_container();
+		exit();
+	}
+	wait();
 	exit();
+	
 }
