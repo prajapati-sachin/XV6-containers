@@ -15,10 +15,13 @@ main(void)
 	char *filename1;
 	filename1="arrok";
 
+	char *filename2;
+	filename2="arrokkk";
+
 	int fd = open(filename, 0);
 	
   	close(fd);
-  	printf(1, "fd 2: %d\n", fd);
+  	printf(1, "fd 1: %d\n", fd);
 
 	// fd = open(filename1, 0x200);
 	
@@ -34,19 +37,19 @@ main(void)
 
 	join_container(1);
 
-	fd = open(filename, 0);
+	fd = open(filename, 1);
 	
   	close(fd);	
 
   	printf(1, "fd 2: %d\n", fd);
 
-  	
+
 
 	fd = open(filename, 0);
 	
   	close(fd);	
 
-	printf(1, "fd 2: %d\n", fd);
+	printf(1, "fd 3: %d\n", fd);
 
 
 
@@ -54,7 +57,14 @@ main(void)
 	
   	close(fd);	
 
-	printf(1, "fd 2: %d\n", fd);
+	printf(1, "fd 4: %d\n", fd);
+
+
+	fd = open(filename2, 0);
+	
+  	close(fd);	
+
+	printf(1, "fd 5: %d\n", fd);
 
 	int ad = fork();
 	if(ad==0){

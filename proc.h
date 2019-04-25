@@ -38,7 +38,7 @@ struct container{
   uint id;
   int curproc;
   int pids[NPROC];
-  char* file_names[10];
+  char file_names[10][10];
   int file_count;
   // struct {
   //   struct spinlock lock;

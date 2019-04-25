@@ -111,9 +111,17 @@ ls(char *path)
     return;
   }
   //////////////////////////////////////////////////
-  char record[100][28];
+  char record[20][20];
+  char record1[20][20];
   int count=0;
+  int count1=0;
+  int stvalues[20][3];
+  // int stvalues1[100][3];
+  int old_count = 0;
+
   int cid = getcid();
+  
+  int pd = getpid();
 
 
   ///////////////////////////////////////////
@@ -140,11 +148,10 @@ ls(char *path)
         continue;
       }
       // printf(1, "ls: %s\n", buf);
-      int cd = check(buf);
-      int pd = getpid();
+
       // if(count >2)
       // printf(1, "cd: %d\n", cd );
-      
+      int cd = check(buf);
       if(cid==0){
         if(cd == 0){
           // char *dese = record[count];
@@ -157,25 +164,38 @@ ls(char *path)
         }
       }
       else{
+
+
         
         if(cd==0){
           char *dese = record[count];
           strcpy(dese, fmtname(buf));
+          
+
+          stvalues[count][0] = st.type;stvalues[count][1] = st.ino;stvalues[count][2] = st.size;
           count++;
-          printf(1, "%s %d %d %d %d %d %d\n", fmtname(buf), st.type, st.ino, st.size, cd, pd, cid);
+          // printf(1, "%s %d %d %d %d %d %d\n", fmtname(buf), st.type, st.ino, st.size, cd, pd, cid);
         }else{
-          if(cd==cid){
-            int j=-1;
-            char *name = cut(buf);
-            for(j=0;j<count;j++){
-              char *dese = record[j];
-              if(strcmp(dese,name)==0)
-                break;
-            }
-            printf(1, "j: %d\n", j );
-            // if(j==count)
-              printf(1, "%s %d %d %d %d %d %d\n", cut(buf), st.type, st.ino, st.size, cd, pd,cid);
-          }
+          // if(cd==cid){
+          //   int j=-1;
+          //   char *name = cut(buf);
+          //   for(j=0;j<count;j++){
+          //     char *dese = record[j];
+          //     if(strcmp(dese,name)==0)
+          //       break;
+          //   }
+          //   // printf(1, "j: %d\n", j );
+          //   if(j==count)
+          //     printf(1, "%s %d %d %d %d %d %d\n", cut(buf), st.type, st.ino, st.size, cd, pd,cid);
+          // }
+          char *dese = record1[count1];
+          strcpy(dese, cut(buf));
+          // stvalues1[count1][0] = st.type;stvalues1[count1][2] = st.ino;stvalues1[count1][2] = st.size
+          count1++;
+          printf(1, "%s %d %d %d %d %d %d\n", cut(buf), st.type, st.ino, st.size, cd, pd,cid);
+
+
+
         }
         
 
@@ -184,6 +204,25 @@ ls(char *path)
       
       // printf(1, "%s %d %d %d\n", fmtname(buf), st.type, st.ino, st.size);
     }
+
+    old_count = count1;
+    if(cid!=0){
+      for(int ii=0;ii<count;ii++){
+        char* name = record[ii];
+        int j = -1;
+        for(j=0;j<old_count;j++){
+            char *dese = record1[j];
+            if(strcmp(dese,name)==0)
+              break;
+        }
+        if(j==old_count)
+          printf(1, "%s %d %d %d %d %d %d\n", record[ii], stvalues[ii][0], stvalues[ii][1], stvalues[ii][2], 0, pd,cid);
+
+
+      }
+    }
+
+
     break;
   }
   close(fd);

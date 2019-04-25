@@ -649,10 +649,11 @@ int add_name(int container_id,char* path){
 	int fcount = container_list.containers[container_id].file_count;
 	char* fname = container_list.containers[container_id].file_names[fcount];
 	strncpy(fname,path,strlen(path));
-	container_list.containers[container_id].file_count += 1;
-	cprintf("count:%d last:%s container:%d\n", container_list.containers[container_id].file_count,path , container_id);
 
-	cprintf("count:%d last:%s container:%d\n", container_list.containers[container_id].file_count,container_list.containers[container_id].file_names[fcount-1] , container_id);
+	container_list.containers[container_id].file_count += 1;
+	// cprintf("count:%d last:%s container:%d\n", container_list.containers[container_id].file_count,path , strlen(path));
+
+	// cprintf("count:%d last:%s container:%d\n", container_list.containers[container_id].file_count,container_list.containers[container_id].file_names[fcount] , container_id);
 	release(&container_list.lock);
 	return 1;
 }

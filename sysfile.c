@@ -296,6 +296,7 @@ sys_open(void)
 	int fd, omode;
 	struct file *f;
 	struct inode *ip;
+	struct inode *ipa,*ipb;
 
 	if(argstr(0, &path) < 0 || argint(1, &omode) < 0)
 		return -1;
@@ -323,21 +324,48 @@ sys_open(void)
 		temp[++i] = '\0';
 
 		
-		take = 2;
-
-		cprintf("here \n");
+		take = 1;
 		path = temp;
+		// ipa = 5; ipb = 6;
+		// cprintf("here %s %s\n",path1,path);
+		
+		// begin_op();
+		if(((ipa = namei(path1)) != 0)){
+			// end_op();
+			// begin_op();
+			if((ipb = namei(path)) == 0){
+				if((omode ==0)){
+					take = 0;
+					path = path1;
+				}else{
+					take=2;
+					add_name(p->container_id,path);
+					// cprintf("here %s %s\n",path1,path);
+				}
 
-		if(((ip = namei(path1)) != 0)&&((ip = namei(path)) == 0)){
-			take=2;
-			add_name(p->container_id,path);
+				// cprintf("%d\n",omode);
+				
 
-			cprintf("here1: \n");
-			// return -1;
+
+			}
+
 		}else{
-			take=0;
+			if((ipb = namei(path)) == 0){
+				if((omode & O_CREATE)){
+					take=3;
+					add_name(p->container_id,path);
+					// cprintf("here1 %s %s\n",path1,path);
+				}else{
+					take = 0;
+				}
+			}
+				// add_name(p->container_id,path);
+			// take=0;
 		}
 
+		// end_op();
+
+		// cprintf("%d \n",ipa);
 		// if((ip = namei(path)) == 0){
 		// 	take=1;
 		// 	//
@@ -355,12 +383,14 @@ sys_open(void)
 
 	// cprintf("here2: %s\n",path1);
 	// cprintf("here2: %s\n",path);
-	cprintf("take: %d\n",take);
+	// cprintf("take: %d\n",take);
 	begin_op();
 	if((omode & O_CREATE)||(take==2)){
+
 		ip = create(path, T_FILE, 0, 0);
 		if(ip == 0){
 			end_op();
+			// cprintf("here3");
 			return -1;
 		}
 	} else {
@@ -387,6 +417,7 @@ sys_open(void)
 		}
 		iunlockput(ip);
 		end_op();
+		// cprintf("here4\n");
 		return -1;
 	}
 	iunlock(ip);
@@ -402,6 +433,7 @@ sys_open(void)
 	// cprintf("here1: %s\n",path);
 	// cprintf("take1: %d\n",take);
 	// take shoud be 2
+	// begin_op();
 	if(take==2){
 			// cprintf("here1: %s\n",path1);
 			// cprintf("here1: %s\n",path);
@@ -444,7 +476,7 @@ sys_open(void)
 				// cprintf("here2: %s\n",&newaddr );
 			}
 
-			end_op();
+			// end_op();
 
 			// int n = fileread(nf, &newaddr, 50);
 			
