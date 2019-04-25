@@ -12,23 +12,45 @@ main(void)
 
 	char *filename;
 	filename="arr";
+	char *filename1;
+	filename1="arrok";
 
 	int fd = open(filename, 0);
 	
   	close(fd);
+  	printf(1, "fd 2: %d\n", fd);
+
+	// fd = open(filename1, 0x200);
+	
+ //  	close(fd);	
+
+	// printf(1, "fd 2: %d\n", fd);
+
+
 	int a = create_container();
 	printf(1, "Container 1: %d\n", a);
 	int b = create_container();
 	printf(1, "Container 2: %d\n", b);
 
 	join_container(1);
+
 	fd = open(filename, 0);
 	
   	close(fd);	
 
   	printf(1, "fd 2: %d\n", fd);
 
+  	
+
 	fd = open(filename, 0);
+	
+  	close(fd);	
+
+	printf(1, "fd 2: %d\n", fd);
+
+
+
+	fd = open(filename1, 0x200);
 	
   	close(fd);	
 

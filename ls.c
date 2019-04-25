@@ -139,9 +139,9 @@ ls(char *path)
         printf(1, "ls: cannot stat %s\n", buf);
         continue;
       }
-
+      // printf(1, "ls: %s\n", buf);
       int cd = check(buf);
-
+      int pd = getpid();
       // if(count >2)
       // printf(1, "cd: %d\n", cd );
       
@@ -150,11 +150,11 @@ ls(char *path)
           // char *dese = record[count];
           // strcpy(dese, fmtname(buf));
           // count++;
-          printf(1, "%s %d %d %d %d\n", fmtname(buf), st.type, st.ino, st.size, cd);
+          printf(1, "%s %d %d %d %d %d %d\n", fmtname(buf), st.type, st.ino, st.size, cd, pd, cid);
         }
-        // else{
-        //   printf(1, "%s %d %d %d %d\n", fmtname(buf), st.type, st.ino, st.size, cd);
-        // }
+        else{
+          // printf(1, "%s %d %d %d %d\n", fmtname(buf), st.type, st.ino, st.size, cd);
+        }
       }
       else{
         
@@ -162,7 +162,7 @@ ls(char *path)
           char *dese = record[count];
           strcpy(dese, fmtname(buf));
           count++;
-          printf(1, "%s %d %d %d %d\n", fmtname(buf), st.type, st.ino, st.size, cd);
+          printf(1, "%s %d %d %d %d %d %d\n", fmtname(buf), st.type, st.ino, st.size, cd, pd, cid);
         }else{
           if(cd==cid){
             int j=-1;
@@ -172,9 +172,9 @@ ls(char *path)
               if(strcmp(dese,name)==0)
                 break;
             }
-            // printf(1, "j: %d\n", j );
-            if(j==count)
-              printf(1, "%s %d %d %d %d\n", fmtname(buf), st.type, st.ino, st.size, cd);
+            printf(1, "j: %d\n", j );
+            // if(j==count)
+              printf(1, "%s %d %d %d %d %d %d\n", cut(buf), st.type, st.ino, st.size, cd, pd,cid);
           }
         }
         

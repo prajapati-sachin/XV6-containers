@@ -38,12 +38,20 @@ struct container{
   uint id;
   int curproc;
   int pids[NPROC];
+  char* file_names[10];
+  int file_count;
   // struct {
   //   struct spinlock lock;
   //   struct file file[NFILE];
   // } cftable;
 };
 
+
+// struct cnl {
+//   struct spinlock lock;
+//   int alloc[NPROC];
+//   struct container containers[NPROC];
+// } container_list;
 // struct{
 //   struct spinlock lock;
 //   int alloc[NPROC];

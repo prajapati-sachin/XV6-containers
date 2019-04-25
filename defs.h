@@ -10,6 +10,8 @@ struct sleeplock;
 struct stat;
 struct superblock;
 
+
+
 int memory_log;
 int scheduler_log;
 
@@ -129,6 +131,7 @@ int 			create_container(void);
 int 			destroy_container(int);
 int 			join_container(int);
 int 			leave_container(void);
+int 			add_name(int ,char* );
 
 // swtch.S
 void            swtch(struct context**, struct context*);

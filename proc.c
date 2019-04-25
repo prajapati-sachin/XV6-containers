@@ -12,7 +12,7 @@ struct {
 	struct proc proc[NPROC];
 } ptable;
 
-struct{
+struct {
 	struct spinlock lock;
 	int alloc[NPROC];
 	struct container containers[NPROC];
@@ -639,7 +639,22 @@ void init_containerlist(void){
 		container_list.alloc[i]=0; 
 		container_list.containers[i].id=0;
 		container_list.containers[i].curproc=-1;
+
 	}
+}
+
+int add_name(int container_id,char* path){
+
+	acquire(&container_list.lock);
+	int fcount = container_list.containers[container_id].file_count;
+	char* fname = container_list.containers[container_id].file_names[fcount];
+	strncpy(fname,path,strlen(path));
+	container_list.containers[container_id].file_count += 1;
+	cprintf("count:%d last:%s container:%d\n", container_list.containers[container_id].file_count,path , container_id);
+
+	cprintf("count:%d last:%s container:%d\n", container_list.containers[container_id].file_count,container_list.containers[container_id].file_names[fcount-1] , container_id);
+	release(&container_list.lock);
+	return 1;
 }
 
 
@@ -659,6 +674,7 @@ int create_container(){
 		// c->id = 1;
 		container_list.alloc[i]=1;
 		container_list.containers[i].id=i;
+		container_list.containers[i].file_count=0;
 		for(int j=0;j<NPROC;j++){
 			container_list.containers[i].pids[j]=-1;
 		}
