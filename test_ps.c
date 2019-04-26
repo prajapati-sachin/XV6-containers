@@ -73,6 +73,9 @@ main(int argc, char *argv[])
   	}
 
     for(int i=0;i<CHILDS;i++) wait();
+    for(int i=0;i<3;i++){
+      destroy_container(cont_ids[i]);
+    }
       exit();
 
 }

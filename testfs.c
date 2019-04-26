@@ -3,98 +3,152 @@
 #include "user.h"
 
 
-char *argv[] = { "cat", "arrok" };
+#define CHILDS 5
+
+int c_ids[CHILDS];
+volatile int parent_pid;
+volatile int this_child_id;
+
+char *argv[] = { "cat", "my_file" };
 
 int
 main(void)
 {
-	// ps();
+	for(int i=0;i<CHILDS;i++) c_ids[i] = -1;
+	parent_pid = getpid();
+
+	int cont_ids[3];
+	for(int i=0;i<3;i++){
+		cont_ids[i] = create_container();
+	}
 	int fd;
-	// char *filename;
-	// filename="arr";
+	//creating 5 childs
+	for(int i=0;i<CHILDS;i++){
+		c_ids[i]=fork();
+		if(c_ids[i]==0){
+			this_child_id = i;
+			break;  
+		} 
+	}
+
 	char *filename1;
-	filename1="arrok";
+	filename1="my_file";
 
-	// char *filename2;
-	// filename2="arrokkk";
+	//Parent
+	if(getpid()==parent_pid){
+		for(int i=0;i<CHILDS;i++) printf(1, "Child %d: Pid = %d\n", i, c_ids[i]);
+	}
 
-	// fd = open(filename, 0);
-	
- //  	close(fd);
- //  	printf(1, "fd 1: %d\n", fd);
+	//Childs
+	else if(this_child_id==0 || this_child_id==1 || this_child_id==2){
+		join_container(cont_ids[0]);
+		sleep(2);
+		
+		
+		if(this_child_id==2){
 
-	// fd = open(filename1, 0x200);
-	
- //  	close(fd);	
+			fd = open(filename1, 0x200|0x002);
+			int pid = getpid();
 
-	// printf(1, "fd 2: %d\n", fd);
+			char *towrite;
+			towrite = " Modified by: ";
+			char temp[20];
+			int i = 0;
+			for(i=0;i<strlen(towrite);i++) temp[i] = towrite[i];
 
+			temp[i] = (pid/10) + '0';
+			temp[++i] = (pid%10) + '0';
+			temp[++i] = '\n';
 
-	int a = create_container();
-	printf(1, "Container 1: %d\n", a);
-	int b = create_container();
-	printf(1, "Container 2: %d\n", b);
+			write(fd,temp,strlen(temp));
+			printf(1, "Child with pid = %d modifying my_file %s\n",pid,temp);
+			int ad = fork();
+			if(ad==0){
+				exec("cat", argv);
+				// printf(1, "fd 5: %d\n", fd);
+				// leave_container();
+				exit();
+			}
+			wait();
 
-	join_container(1);
-
-	// fd = open(filename, 1);
-	
- //  	close(fd);	
-
- //  	printf(1, "fd 2: %d\n", fd);
-
-  	// cat(filename1);
-
-
-
-	// fd = open(filename1, 0);
-	
- //  	close(fd);	
-
-	// printf(1, "fd 3: %d\n", fd);
-
-
-
-	fd = open(filename1, 0x200|0x002);
-	int pid = getpid();
-
-	char *towrite;
-	towrite = " Modified by: ";
-	char temp[20];
-	int i = 0;
-	for(i=0;i<strlen(towrite);i++) temp[i] = towrite[i];
-
-	temp[i] = (pid/10) + '0';
-	temp[++i] = (pid%10) + '0';
-	temp[++i] = '\n';
-
-	write(fd,temp,strlen(temp));
-
-
-	// write (" Modified by: "+ pid);
-
-  	close(fd);	
-
-	printf(1, "fd 4: %d\n", fd);
-
-
-	// fd = open(filename2, 0);
-	
- //  	close(fd);	
-
-	// printf(1, "fd 5: %d\n", fd);
-
-	int ad = fork();
-	if(ad==0){
-		// exec("cat", argv);
-		printf(1, "fd 5: %d\n", fd);
-		// leave_container();
+		}
+		// ls();
 		exit();
 	}
-	// leave_container();
-	sleep(10);
-	destroy_container(1);
-	wait();
+	else if(this_child_id==3){
+		join_container(cont_ids[1]);
+		sleep(100);
+		fd = open(filename1, 0x200|0x002);
+		int pid = getpid();
+
+		char *towrite;
+		towrite = " Modified by: ";
+		char temp[20];
+		int i = 0;
+		for(i=0;i<strlen(towrite);i++) temp[i] = towrite[i];
+
+		temp[i] = (pid/10) + '0';
+		temp[++i] = (pid%10) + '0';
+		temp[++i] = '\n';
+
+		write(fd,temp,strlen(temp));
+		printf(1, "Child with pid = %d modifying my_file %s\n",pid,temp);
+		int ad = fork();
+		if(ad==0){
+			exec("cat", argv);
+			// printf(1, "fd 5: %d\n", fd);
+			// leave_container();
+			exit();
+		}
+		wait();
+
+		exit();
+	}
+	else if(this_child_id==4){
+		join_container(cont_ids[2]);
+		sleep(200);
+		fd = open(filename1, 0x200|0x002);
+		int pid = getpid();
+
+		char *towrite;
+		towrite = " Modified by: ";
+		char temp[20];
+		int i = 0;
+		for(i=0;i<strlen(towrite);i++) temp[i] = towrite[i];
+
+		temp[i] = (pid/10) + '0';
+		temp[++i] = (pid%10) + '0';
+		temp[++i] = '\n';
+
+		write(fd,temp,strlen(temp));
+		printf(1, "Child with pid = %d modifying my_file: %s\n",pid,temp);
+		int ad = fork();
+		if(ad==0){
+			exec("cat", argv);
+			// printf(1, "fd 5: %d\n", fd);
+			// leave_container();
+			exit();
+		}
+		wait();
+		exit();
+	}
+
+
+	for(int i=0;i<CHILDS;i++) wait();
 	exit();
+
+
+	// int ad = fork();
+	// if(ad==0){
+	// 	// exec("cat", argv);
+	// 	printf(1, "fd 5: %d\n", fd);
+	// 	// leave_container();
+	// 	exit();
+	// }
+	// // leave_container();
+	// sleep(10);
+	// destroy_container(1);
+	// wait();
+	// exit();
 	
 }

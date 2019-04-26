@@ -193,7 +193,7 @@ ls(char *path)
             strcpy(dese, cut(buf));
             // stvalues1[count1][0] = st.type;stvalues1[count1][2] = st.ino;stvalues1[count1][2] = st.size
             count1++;
-            printf(1, "%s %d %d %d %d %d %d\n", fmtname(buf), st.type, st.ino, st.size, cd, pd,cid);
+            printf(1, "%s %d %d %d %d %d %d\n", cut(buf), st.type, st.ino, st.size, cd, pd,cid);
           }
 
 

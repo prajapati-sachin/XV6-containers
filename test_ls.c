@@ -51,10 +51,11 @@ main(int argc, char *argv[])
 				// leave_container();
 				exit();
 			}
+
 		}
 		// ls();
-		sleep(400);
 		
+		sleep(100);
 		char *temp;
 		temp = "file_";
 		char temp1[30];
@@ -78,6 +79,7 @@ main(int argc, char *argv[])
 				exit();
 			}
 			
+			wait();
 			wait();
 		}
 		// ls();
@@ -123,16 +125,17 @@ main(int argc, char *argv[])
 	}
 	else if(this_child_id==4){
 		join_container(cont_ids[2]);
-		// sleep(400);      
+		sleep(1200);      
 		printf(1, "ls outputs for container 2\n");				
 		// ls();
-		// int ad = fork();
-		// if(ad==0){
-		// 	exec("ls", argv);
+		int ad = fork();
+		if(ad==0){
+			exec("ls", argv);
 			
-		// 	// leave_container();
-		// 	exit();
-		// }
+			// leave_container();
+			exit();
+		}
+		wait();
 		char *temp;
 		temp = "file_";
 		char temp1[30];
@@ -144,15 +147,14 @@ main(int argc, char *argv[])
 		temp1[++i] = '\0';
 		fd =open(temp1, 0x200);
 		close(fd);
-		// int bd = fork();
-		// if(bd==0){
-		// 	exec("ls", argv);
+		int bd = fork();
+		if(bd==0){
+			exec("ls", argv);
 			
-		// 	// leave_container();
-		// 	exit();
-		// }
+			// leave_container();
+			exit();
+		}
 
-		wait();
 		wait();
 		// ls();
 		exit();           
@@ -160,5 +162,8 @@ main(int argc, char *argv[])
 
 
 	for(int i=0;i<CHILDS;i++) wait();
+	for(int i=0;i<3;i++){
+		destroy_container(cont_ids[i]);
+	}
 	exit();
 }

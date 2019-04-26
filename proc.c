@@ -356,6 +356,7 @@ scheduler(void)
 	c->proc = 0;
 	
 	for(;;){
+
 		// Enable interrupts on this processor.
 		sti();
 
@@ -388,13 +389,15 @@ scheduler(void)
 		int i;
 		for(i=1; i<NPROC; i++){
 			if(container_list.alloc[i]==0) continue;
-			int j = container_list.containers[i].curproc+1;
+			int j = (container_list.containers[i].curproc+1)%NPROC;
 			int k = 0;
 			for(;;){
 				int temp_pid = container_list.containers[i].pids[j];
+				// if(temp_pid==-1) continue;
 				int found=0;
 				for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
 					if(p->pid==temp_pid) {
+						// cprintf("found process%d\n",temp_pid );
 						found=1;
 						break;
 					}
@@ -403,11 +406,11 @@ scheduler(void)
 				j = (j+1)%NPROC;
 				k++;
 
-				if(found==0){
-					
-				}
+				// if(found==0){
+				// 	break;
+				// }
 
-				if(p->state == RUNNABLE){
+				if(p->state == RUNNABLE&&found==1){
 					container_list.containers[i].curproc = (container_list.containers[i].curproc+1)%NPROC;
 					if(scheduler_log) cprintf("Container %d: Scheduling Process %d\n",i,  p->pid);
 					// Switch to chosen process.  It is the process's job
@@ -636,7 +639,7 @@ void ps(void){
 			// cprintf("pid:%d 	name:%s 	container:%d\n", p->pid, p->name, p->container_id);
 			// cprintf("here\n");
 			if(p->container_id==my_cnid){
-				cprintf("pid:%d name:%d container:%d\n", p->pid, my_cnid, p->container_id);
+				cprintf("pid:%d name:%s container:%d\n", p->pid, p->name, p->container_id);
 			}
 			// state = states[p->state];
 		}
@@ -662,8 +665,14 @@ int add_name(int container_id,char* path){
 	acquire(&container_list.lock);
 	int fcount = container_list.containers[container_id].file_count;
 	char* fname = container_list.containers[container_id].file_names[fcount];
-	strncpy(fname,path,strlen(path));
+	
+	char temp[16];
+	// char temp[100];
+		int i;
+		for(i=0;i<strlen(path);i++) temp[i] = path[i];
 
+		temp[i] = '\0';
+	strncpy(fname,temp,strlen(path));
 	container_list.containers[container_id].file_count += 1;
 	// cprintf("count:%d last:%s container:%d\n", container_list.containers[container_id].file_count,path , strlen(path));
 
@@ -734,9 +743,15 @@ int destroy_container(int i){
 			// 	char* name = container_list.containers[i].file_names[k];
 			// 	// char* fna;
 			// 	// strncpy(fna,name,strlen(name));
+			// 	// char temp[100];
+			// 	// int i;
+			// 	// for(i=0;i<length;i++) temp[i] = path[i];
+
+			// 	// temp[++i] = '\0';
+			// 	cprintf("name: %s\n",name);
 			// 	unlin(name);
 			// }
-			// container_list.containers[i].file_count=0;
+			container_list.containers[i].file_count=0;
 			
 			release(&container_list.lock);
 			return 0;
