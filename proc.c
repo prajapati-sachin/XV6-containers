@@ -364,6 +364,9 @@ scheduler(void)
 		for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
 			if(p->state != RUNNABLE || p->container_id!=0)
 				continue;
+			// if(p->state != RUNNABLE)
+			// 	continue;
+
 
 			if(scheduler_log) cprintf("Scheduling Process(not in any container): %d\n", p->pid);
 
@@ -389,12 +392,20 @@ scheduler(void)
 			int k = 0;
 			for(;;){
 				int temp_pid = container_list.containers[i].pids[j];
+				int found=0;
 				for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-					if(p->pid==temp_pid) break;
+					if(p->pid==temp_pid) {
+						found=1;
+						break;
+					}
 				}
 				
 				j = (j+1)%NPROC;
 				k++;
+
+				if(found==0){
+					
+				}
 
 				if(p->state == RUNNABLE){
 					container_list.containers[i].curproc = (container_list.containers[i].curproc+1)%NPROC;
@@ -622,8 +633,11 @@ void ps(void){
 		if(p->state == UNUSED)
 			continue;
 		if(p->state >= 0 && p->state < NELEM(states) && states[p->state]){
-			if(p->container_id==my_cnid)
-				cprintf("pid:%d name:%s container:%d\n", p->pid, p->name, p->container_id);
+			// cprintf("pid:%d 	name:%s 	container:%d\n", p->pid, p->name, p->container_id);
+			// cprintf("here\n");
+			if(p->container_id==my_cnid){
+				cprintf("pid:%d name:%d container:%d\n", p->pid, my_cnid, p->container_id);
+			}
 			// state = states[p->state];
 		}
 		
@@ -697,15 +711,33 @@ int destroy_container(int i){
 			return -1;
 		}
 		else{
+			release(&container_list.lock);
 			acquire(&ptable.lock);
+			int to_kill[NPROC];int count=0;
 			struct proc* p;
 			for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-				if(p->container_id == i) kill(p->pid);															
+				if(p->container_id == i){
+					to_kill[count] = p->pid;
+					count++;
+				} 														
 			}
 			release(&ptable.lock);
 
+			for(int k=0;k<count;k++){
+				kill(to_kill[k]);
+			}
+
+			acquire(&container_list.lock);
 			container_list.alloc[i]=0;
 			container_list.containers[i].id=0;
+			// for(int k=0;k<container_list.containers[i].file_count;k++){
+			// 	char* name = container_list.containers[i].file_names[k];
+			// 	// char* fna;
+			// 	// strncpy(fna,name,strlen(name));
+			// 	unlin(name);
+			// }
+			// container_list.containers[i].file_count=0;
+			
 			release(&container_list.lock);
 			return 0;
 		}
@@ -721,8 +753,15 @@ int join_container(int i){
 		release(&ptable.lock);
 		return -1;
 	}
-
+	// if(i==1){
+	// 	cprintf("ok_pid %d\n",p->pid);
+	// }
+	
 	p->container_id = i;
+
+	// if(i==1){
+	// 	cprintf("ok_cid %d\n",p->container_id);
+	// }
 	release(&ptable.lock);
 
 	acquire(&container_list.lock);
